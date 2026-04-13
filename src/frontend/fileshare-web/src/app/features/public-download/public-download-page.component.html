@@ -1,49 +1,78 @@
-<section class="download-layout">
-  <a class="back-link" routerLink="/">Back to upload</a>
+<section class="public-layout">
+  <aside class="public-intro card card--animated">
+    <p class="public-intro__eyebrow">Public link</p>
+    <h2>Secure file delivery</h2>
+    <p>
+      This temporary page provides controlled access based on expiration and download limits.
+    </p>
+    <a class="back-link" routerLink="/">
+      <app-icon name="upload" />
+      Back to upload
+    </a>
+
+    <app-share-animation />
+  </aside>
 
   @if (isLoading()) {
-    <article class="card card--state">
-      <p>Loading link details...</p>
+    <article class="card card--state card--animated">
+      <p class="state-title">Checking link status...</p>
+      <p>Please wait while we load file details.</p>
     </article>
   } @else if (error()) {
-    <article class="card card--state">
+    <article class="card card--state card--animated">
+      <app-icon name="error" />
       <p class="state-title">Link unavailable</p>
       <p>{{ error() }}</p>
     </article>
   } @else {
-    <article class="card card--summary">
-      <p class="card__eyebrow">Public link</p>
-      <h2>{{ metadata()?.fileName }}</h2>
+    <article class="card card--summary card--animated">
+      <div class="file-header">
+        <div class="file-header__icon">
+          <app-icon [name]="fileIcon()" />
+        </div>
+        <div>
+          <h3 class="file-name">{{ metadata()?.fileName }}</h3>
+          <app-status-badge [label]="statusLabel()" [tone]="statusTone()" />
+        </div>
+      </div>
+
+      @if (imagePreviewPossible() && canDownload()) {
+        <section class="preview-section">
+          @if (revealImagePreview()) {
+            <img class="image-preview" [src]="downloadUrl()" [alt]="'Preview of ' + (metadata()?.fileName ?? 'shared image')" />
+          } @else {
+            <p class="preview-note">Preview is optional and may count as one download.</p>
+            <button class="preview-button" type="button" (click)="showImagePreview()">Load image preview</button>
+          }
+        </section>
+      }
 
       <dl class="summary-grid">
         <div>
-          <dt>Status</dt>
-          <dd>{{ availability()?.status }}</dd>
+          <dt><app-icon name="download" /> Downloads</dt>
+          <dd>{{ downloadsDisplay() }}</dd>
         </div>
         <div>
-          <dt>Content type</dt>
+          <dt><app-icon name="clock" /> Expiration</dt>
+          <dd>{{ expirationDisplay() }}</dd>
+        </div>
+        <div>
+          <dt><app-icon name="file" /> Type</dt>
           <dd>{{ metadata()?.contentType }}</dd>
         </div>
         <div>
-          <dt>Size</dt>
-          <dd>{{ metadata()?.size | number }} bytes</dd>
-        </div>
-        <div>
-          <dt>Downloads</dt>
-          <dd>{{ availability()?.downloadCount ?? 0 }} / {{ availability()?.maxDownloads ?? 'unlimited' }}</dd>
-        </div>
-        <div>
-          <dt>Expires at</dt>
-          <dd>{{ metadata()?.expiresAt | date: 'medium' }}</dd>
+          <dt><app-icon [name]="fileIcon()" /> Size</dt>
+          <dd>{{ formatFileSize(metadata()?.size) }}</dd>
         </div>
       </dl>
 
       @if (availability()?.reason) {
-        <p class="reason">{{ availability()?.reason }}</p>
+        <p class="reason" role="status">{{ availability()?.reason }}</p>
       }
 
-      <button class="download-action" type="button" [disabled]="!availability()?.available" (click)="download()">
-        {{ availability()?.available ? 'Download file' : 'Link not available' }}
+      <button class="download-action" type="button" [disabled]="!canDownload()" (click)="download()">
+        <app-icon name="download" />
+        {{ canDownload() ? 'Download file' : 'Download unavailable' }}
       </button>
     </article>
   }

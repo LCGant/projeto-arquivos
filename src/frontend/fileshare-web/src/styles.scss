@@ -23,6 +23,7 @@ body {
 body {
   font-family: var(--font-sans);
   background: #f5f0e4;
+  color: var(--ink-900);
 }
 
 button,
@@ -30,4 +31,13 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent-500);
+  outline-offset: 2px;
 }
